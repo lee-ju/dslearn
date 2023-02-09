@@ -3,6 +3,7 @@ import pandas as pd
 from scipy import stats
 import statsmodels.api as sm
 import warnings
+from copy import deepcopy
 
 def lm_stat(model, X, y, alternative="two_sided", variables=None, digits=3):
   """
@@ -61,7 +62,7 @@ def lm_r2(model, X, y, adjust=True, digits=3):
   else:
     return round(float(r2), digits)
 
-def stepwise(X, y, model_type='linear', thred=0.05, variables=None):
+def stepwise(X, y, model_type='linear', thred=0.05, variables=None, logit_method='bfgs', disp=0):
   """
   @params \n
   X : independent variables \n
@@ -78,6 +79,7 @@ def stepwise(X, y, model_type='linear', thred=0.05, variables=None):
   else:
     X = pd.DataFrame(X, columns=variables)
 
+  features = deepcopy(variables)
   selected = []
   
   #sv_per_step = []
@@ -85,17 +87,17 @@ def stepwise(X, y, model_type='linear', thred=0.05, variables=None):
   #steps = []
   #step = 0
 
-  while len(variables) > 0:
-    remained = list(set(variables) - set(selected))
+  while len(features) > 0:
+    remained = list(set(features) - set(selected))
     pval = pd.Series(index=remained)
     for col in remained:
       x = X[selected + [col]]
       x = sm.add_constant(x)
 
       if model_type == 'linear':
-        model = sm.OLS(y, x).fit(disp=0)
+        model = sm.OLS(y, x).fit(disp=disp)
       elif model_type == 'logit':
-        model = sm.Logit(y, x).fit()
+        model = sm.Logit(y, x).fit(method=logit_method, disp=disp)
 
       pval[col] = model.pvalues[col]
 
@@ -108,9 +110,9 @@ def stepwise(X, y, model_type='linear', thred=0.05, variables=None):
         selected_X = sm.add_constant(selected_X)
 
         if model_type == 'linear':
-          selected_pval = sm.OLS(y, selected_X).fit(disp=0).pvalues[1:]
+          selected_pval = sm.OLS(y, selected_X).fit(disp=disp).pvalues[1:]
         elif model_type == 'logit':
-          selected_pval = sm.Logit(y, selected_X).fit().pvalues[1:]
+          selected_pval = sm.Logit(y, selected_X).fit(method=logit_method, disp=disp).pvalues[1:]
 
         max_pval = selected_pval.max()
 
