@@ -25,10 +25,13 @@ def lm_stat(model, X, y, alternative="two_sided", variables=None, digits=3):
 
   if (alternative == 'two_sided') or (alternative == 't'):
     p_val = [2*(1-stats.t.cdf(np.abs(ts), N-2)) for ts in ts_b]
+    p_val_name = 'Pr(>|t_val|)'
   elif (alternative == 'greater') or (alternative == 'g'):
     p_val = [(1-stats.t.cdf(ts, N-2)) for ts in ts_b]
+    p_val_name = 'Pr(>t_val)'
   elif (alternative == 'less') or (alternative == 'l'):
     p_val = [(stats.t.cdf(ts, N-2)) for ts in ts_b]
+    p_val_name = 'Pr(<t_val)'
   else:
     print("ERROR: \nChoose the SPECIFIC parameter for 'alternative'")
 
@@ -39,7 +42,7 @@ def lm_stat(model, X, y, alternative="two_sided", variables=None, digits=3):
   params = np.round(params, digits)
 
   df = pd.DataFrame()
-  df['coef'], df['se'], df['t_val'], df['p_val'] = [params, sd_b, ts_b, p_val]
+  df['coef'], df['se'], df['t_val'], df[p_val_name] = [params, sd_b, ts_b, p_val]
 
   if variables == None:
     variables = ['Beta'+str(i+1) for i in range(X.shape[1])]
