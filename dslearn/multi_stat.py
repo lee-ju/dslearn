@@ -6,7 +6,7 @@ import warnings
 from copy import deepcopy
 from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
-%matplotlib inline
+#%matplotlib inline
 
 def lm_stat(model, X, y, alternative="two_sided", variables=None, digits=3):
   """
