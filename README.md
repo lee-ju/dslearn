@@ -1,7 +1,16 @@
 # dslearn
+## Packages
+```python
+import os, sys
+my_path = '/content/notebooks'
+os.symlink('/content/drive/MyDrive/Colab Notebooks/my_env', my_path)
+
+sys.path.insert(0, my_path)
+```
 ## Installation
 
 `pip install git+https://github.com/lee-ju/dslearn.git`
+`!pip install --target=$my_path git+https://github.com/lee-ju/dslearn.git` # 
 
 ### Usage: Statistical Test
 ```python
