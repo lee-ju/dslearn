@@ -4,6 +4,9 @@ from scipy import stats
 import statsmodels.api as sm
 import warnings
 from copy import deepcopy
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
+%matplotlib inline
 
 def lm_stat(model, X, y, alternative="two_sided", variables=None, digits=3):
   """
@@ -134,6 +137,52 @@ def stepwise(X, y, model_type='linear', thred=0.05, variables=None, logit_method
       break
   return selected
 
+def viz_boundary(model, X, y, variables=None,
+                 margin=1, h=300, color_list=['r', 'g', 'b'],
+                 figsize=(5, 5), alpha=0.1, markersize=2,
+                 xlab='X1', ylab='X2', fontsize=10, rotation=0):
+  """
+  @params \n
+  model : classifier in sklearn
+  X : (numpy.array) 2-dimensional independent variables of model \n
+  y : dependent variable of model \n
+  """
+  if type(X) != np.ndarray:
+    X = np.array(X)
+    y = np.array(y)
+  if X.shape[1] == 2:
+    mn_x1 = int(X[:, 0].min()) - margin
+    mx_x1 = int(X[:, 0].max()) + margin
+
+    mn_x2 = int(X[:, 1].min()) - margin
+    mx_x2 = int(X[:, 1].max()) + margin
+
+    x1s = np.linspace(mn_x1, mx_x1, h)
+    x2s = np.linspace(mn_x2, mx_x2, h)
+
+    x1, x2 = np.meshgrid(x1s, x2s)
+    x_new = np.c_[x1.ravel(), x2.ravel()]
+    y_pred = model.predict(x_new).reshape(x1.shape)
+    axes = [mn_x1, mx_x1, mn_x2, mx_x2]
+
+    unique_y = list(np.unique(y))
+    y_col = color_list[:len(unique_y)]  
+    custom_cmap = ListedColormap(y_col)
+
+    plt.figure(figsize=figsize)
+    plt.contourf(x1, x2, y_pred, cmap=custom_cmap, alpha=alpha)
+
+    for i, yi in enumerate(unique_y):
+      ci = y_col[i] + 'o'
+      plt.plot(X[:,0][y==yi], X[:,1][y==yi], ci, markersize=markersize)
+    plt.axis(axes)
+    plt.xlabel(xlab, fontsize=fontsize)
+    plt.ylabel(ylab, fontsize=fontsize, rotation=rotation)
+
+    plt.show()
+  else:
+    print("X should be 2-dimensional numpy.array")
+    
 if __name__ == '__main__':
   from dslearn import multi_stat
 
